@@ -35,6 +35,7 @@
                 type="text"
                 class="outline-none w-full focs:border-2 focus:border-blue-accent text-black text-sm font-semibold border py-4 px-8 rounded-lg mb-4"
                 placeholder="First Name"
+                v-model="firstname"
               />
               <ErrorMessage
                 name="firstname"
@@ -46,6 +47,7 @@
                 type="text"
                 class="outline-none w-full focs:border-2 focus:border-blue-accent text-black text-sm font-semibold border py-4 px-8 rounded-lg mb-4"
                 placeholder="Last Name"
+                v-model="lastname"
               />
               <ErrorMessage
                 name="lastname"
@@ -57,6 +59,7 @@
                 type="text"
                 class="outline-none w-full focs:border-2 focus:border-blue-accent text-black text-sm font-semibold border py-4 px-8 rounded-lg mb-4"
                 placeholder="Email Address"
+                v-model="email"
               />
               <ErrorMessage
                 name="email"
@@ -68,6 +71,7 @@
                 type="text"
                 class="outline-none w-full focs:border-2 focus:border-blue-accent text-black text-sm font-semibold border py-4 px-8 rounded-lg mb-4"
                 placeholder="Password"
+                v-model="password"
               />
               <ErrorMessage
                 name="password"
@@ -97,6 +101,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Form, Field, ErrorMessage } from "vee-validate";
+import UserService from "../api/user/user.service";
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 export default defineComponent({
   name: "RegisterView",
@@ -105,9 +112,32 @@ export default defineComponent({
     Field,
     ErrorMessage,
   },
+  data() {
+    return {
+      firstname: "",
+      lastname: "",
+      email: "",
+      password: "",
+    };
+  },
   methods: {
     onSubmit() {
-      alert("Validation successfull");
+      const data = {
+        firstName: this.firstname,
+        lastName: this.lastname,
+        email: this.email,
+        password: this.password,
+      };
+      UserService.register(data)
+        .then(() => {
+          this.$router.push("/register");
+          toast.success("Successfully registered");
+        })
+        .catch((err) => {
+          if (err.response.data.statusCode === 400) {
+            toast.error("User already exists");
+          }
+        });
     },
     validateEmail(value: string) {
       if (!value) {
